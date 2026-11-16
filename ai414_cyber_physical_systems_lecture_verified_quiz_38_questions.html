@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI414: Cyber-Physical Systems — Lecture-Verified Quiz (38 Questions)</title>
+  
+  <!-- Google Fonts: Inter for crisp English/Math & Cairo for Arabic UI labels -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Cairo', 'system-ui', 'sans-serif'],
+            arabic: ['Cairo', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            canvas: '#f4f6fb',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Smooth scrolling and clean base styling */
+    html {
+      scroll-behavior: smooth;
+      background-color: #f4f6fb;
+    }
+
+    body {
+      background-color: #f4f6fb;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Micro-animations for option selection and explanation reveal */
+    @keyframes fadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes popPulse {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.985); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-explanation {
+      animation: fadeSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-select {
+      animation: popPulse 0.22s ease-out;
+    }
+
+    /* Hide scrollbar on horizontal topic filter bar while keeping scroll functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- ===================================================================== -->
+  <!-- STICKY TOP PROGRESS & FILTER HEADER                                   -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+      
+      <!-- Top Row: Title & Primary Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+            CPS
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+              AI414 — Cyber-Physical Systems Quiz
+            </h1>
+            <p class="text-xs text-slate-500 font-arabic" dir="rtl">
+              بنك الأسئلة المعتمد من المحاضرات (38 سؤال) • تصحيح فوري
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons: Order Toggle & Retake -->
+        <div class="flex items-center gap-2">
+          <button
+            id="toggle-order-btn"
+            type="button"
+            onclick="toggleOrderMode()"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold font-arabic bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200/80 transition active:scale-95"
+            title="Switch between Shuffled Order and Lecture Topic Order"
+          >
+            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+            <span id="toggle-order-label">ترتيب عشوائي</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="retakeQuiz()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold font-arabic bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 transition active:scale-95"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>إعادة الكويز</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Middle Row: Live Counters & Progress Bar -->
+      <div class="mt-3 pt-2.5 border-t border-slate-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-arabic mb-1.5" dir="rtl">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              تمت الإجابة: <strong id="stat-answered" class="font-sans text-slate-900">0 / 38</strong>
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60">
+              <span>✓</span>
+              صحيح: <strong id="stat-correct" class="font-sans text-emerald-800">0</strong>
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold border border-rose-200/60">
+              <span>✕</span>
+              خطأ: <strong id="stat-wrong" class="font-sans text-rose-800">0</strong>
+            </span>
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/60">
+            النسبة: <strong id="stat-accuracy" class="font-sans text-indigo-900">0%</strong>
+          </div>
+        </div>
+
+        <!-- Visual Progress Bar -->
+        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            id="progress-bar"
+            class="h-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-emerald-500 rounded-full transition-all duration-300 ease-out"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Topic Filter Bar -->
+      <nav id="topic-filters" class="mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" dir="rtl" aria-label="Topic Filters">
+        <!-- Populated dynamically via JS -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN QUIZ CONTAINER (ALL QUESTIONS ON ONE SCROLLABLE PAGE)            -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6">
+    
+    <!-- Active Filter Banner (Shown when filtering by Wrong Answers or specific topic) -->
+    <div id="filter-status-banner" class="hidden mb-5 px-4 py-3 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex flex-wrap items-center justify-between gap-2 font-arabic text-sm" dir="rtl">
+      <span id="filter-status-text" class="text-indigo-900 font-semibold"></span>
+      <button
+        type="button"
+        onclick="setCategoryFilter('ALL')"
+        class="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition"
+      >
+        عرض كل الأسئلة (38)
+      </button>
+    </div>
+
+    <!-- Questions List -->
+    <div id="questions-container" class="space-y-5">
+      <!-- Question cards injected dynamically -->
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- FINAL RESULTS SUMMARY CARD (BOTTOM OF PAGE)                         -->
+    <!-- =================================================================== -->
+    <section id="results-summary" class="mt-10 bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6" dir="rtl">
+        
+        <div class="text-center md:text-right space-y-2">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+            ملخص النتيجة النهائية • Results Summary
+          </span>
+          <h2 id="summary-headline" class="text-xl sm:text-2xl font-extrabold text-slate-900 font-arabic">
+            ابدأ بحل الأسئلة بالأعلى لمتابعة مستواك
+          </h2>
+          <p id="summary-subtext" class="text-sm text-slate-500 font-arabic">
+            جميع الأسئلة الـ 38 متاحة في هذه الصفحة مع تصحيح فوري ومرجع كل سؤال في المحاضرات.
+          </p>
+        </div>
+
+        <!-- Score Stats Box -->
+        <div class="grid grid-cols-3 gap-3 w-full md:w-auto shrink-0">
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3 text-center">
+            <div class="text-xs text-slate-500 font-arabic mb-0.5">الدرجة</div>
+            <div id="summary-score" class="text-lg sm:text-xl font-extrabold text-slate-900 font-sans">0 / 38</div>
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl px-4 py-3 text-center">
+            <div class="text-xs text-emerald-700 font-arabic mb-0.5">الدقة</div>
+            <div id="summary-accuracy" class="text-lg sm:text-xl font-extrabold text-emerald-700 font-sans">0%</div>
+          </div>
+          <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl px-4 py-3 text-center">
+            <div class="text-xs text-rose-700 font-arabic mb-0.5">أخطاء</div>
+            <div id="summary-wrong" class="text-lg sm:text-xl font-extrabold text-rose-700 font-sans">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Action Buttons -->
+      <div class="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-center sm:justify-end gap-3 font-arabic" dir="rtl">
+        <button
+          id="review-wrong-btn"
+          type="button"
+          onclick="reviewWrongAnswers()"
+          class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition active:scale-95"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span>مراجعة الإجابات الخاطئة (<span id="wrong-btn-count" class="font-sans">0</span>)</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="retakeQuiz()"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 transition active:scale-95"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span>إعادة الكويز وعمل Shuffle</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Custom Non-Blocking Toast Notification (Replaces alert/confirm) -->
+  <div
+    id="toast"
+    class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300"
+  >
+    <div id="toast-inner" class="px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs sm:text-sm font-semibold font-arabic shadow-lg flex items-center gap-2" dir="rtl">
+      <span id="toast-icon">✨</span>
+      <span id="toast-message"></span>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- QUIZ DATA & APPLICATION LOGIC                                         -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * Exact dataset of 38 Lecture-Verified Questions for AI414: Cyber-Physical Systems.
+     * Each option object stores { text, isCorrect } so shuffling options preserves exact correctness.
+     */
+    const RAW_QUESTIONS = [
+      // --- Category: CPS & Models (1-8) ---
+      {
+        id: 1,
+        category: "CPS & Models",
+        question: "What is a Cyber-Physical System (CPS)?",
+        options: [
+          { text: "A system that integrates physical and cyber components", isCorrect: true },
+          { text: "A system that involves only physical components", isCorrect: false },
+          { text: "A system that only involves network communication", isCorrect: false },
+          { text: "A system that only involves software and no physical components", isCorrect: false }
+        ],
+        explanation: "Lecture 1 ('What Are CPS?'): CPS are networked systems in which computational (cyber) components are tightly integrated with physical components."
+      },
+      {
+        id: 2,
+        category: "CPS & Models",
+        question: "Which of the following are cyber-physical systems?",
+        options: [
+          { text: "A calculator", isCorrect: false },
+          { text: "A robotic system & a calculator", isCorrect: false },
+          { text: "A software system", isCorrect: false },
+          { text: "An electric power network & a robotic system", isCorrect: true }
+        ],
+        explanation: "Lecture 1 ('CPS in Everyday Life' & 'Trends & Benefits'): Industrial robotics and smart-grid electric power networks combine sensing, computation, and physical actuation."
+      },
+      {
+        id: 3,
+        category: "CPS & Models",
+        question: "Which of the following is a method to model CPS?",
+        options: [
+          { text: "All of the above", isCorrect: true },
+          { text: "Continuous-time model", isCorrect: false },
+          { text: "Discrete-time model", isCorrect: false },
+          { text: "Finite state machine", isCorrect: false }
+        ],
+        explanation: "Lectures 2, 3 & 6: CPS are modeled using discrete-time models / Finite State Machines (FSMs), continuous-time models, and hybrid systems."
+      },
+      {
+        id: 4,
+        category: "CPS & Models",
+        question: "What distinguishes a continuous-time model from a discrete-time model?",
+        options: [
+          { text: "Continuous-time models use time steps, while discrete-time does not", isCorrect: false },
+          { text: "Continuous-time models don't use any time-related functions", isCorrect: false },
+          { text: "Continuous-time models track physical changes at every moment", isCorrect: true },
+          { text: "Discrete-time models are used only for algorithms", isCorrect: false }
+        ],
+        explanation: "Lectures 2, 3 & 6: Continuous systems flow smoothly in time (differential equations), whereas discrete systems change at distinct points/steps in time."
+      },
+      {
+        id: 5,
+        category: "CPS & Models",
+        question: "Which of the following is a key feature of continuous-time models in CPS?",
+        options: [
+          { text: "They allow for modeling the dynamics of physical components", isCorrect: true },
+          { text: "They characterize the system in terms of discrete steps", isCorrect: false },
+          { text: "They don't consider input-output relationships", isCorrect: false },
+          { text: "They only track cyber components", isCorrect: false }
+        ],
+        explanation: "Lectures 3 & 6: Continuous-time models describe physical processes flowing smoothly over time using differential equations."
+      },
+      {
+        id: 6,
+        category: "CPS & Models",
+        question: "What is a hybrid automaton in CPS modeling?",
+        options: [
+          { text: "A communication protocol for CPS", isCorrect: false },
+          { text: "A physical component of the system", isCorrect: false },
+          { text: "A system that combines discrete-time and continuous-time models", isCorrect: true },
+          { text: "A type of cyber-only system", isCorrect: false }
+        ],
+        explanation: "Lectures 3 & 6: A hybrid system combines continuous evolution (flows) inside modes with discrete transitions (jumps) between modes."
+      },
+      {
+        id: 7,
+        category: "CPS & Models",
+        question: "What does a discrete-time model in CPS help to relate?",
+        options: [
+          { text: "Continuous-time variables", isCorrect: false },
+          { text: "Only the physical components", isCorrect: false },
+          { text: "The algorithm and sensor readings only", isCorrect: false },
+          { text: "The current state and input over time", isCorrect: true }
+        ],
+        explanation: "Lecture 2 (Slide 19): The discrete update function (s(n+1), y(n)) = update(s(n), x(n)) relates the current state and input over time."
+      },
+      {
+        id: 8,
+        category: "CPS & Models",
+        question: "True or false: A cyber-physical system has trajectories that change continuously, and at isolated time instances, exhibit jumps.",
+        options: [
+          { text: "True", isCorrect: true },
+          { text: "False", isCorrect: false }
+        ],
+        explanation: "Lectures 3 & 6 ('Hybrid systems'): Hybrid CPS trajectories flow continuously inside each mode and exhibit discrete jumps at transition instants."
+      },
+
+      // --- Category: Thermostat & FSM (9-17) ---
+      {
+        id: 9,
+        category: "Thermostat & FSM",
+        question: "In the thermostat example: if q = ON and T ≥ Tmax, then q+ will be:",
+        options: [
+          { text: "q+ = ON", isCorrect: false },
+          { text: "q+ = OFF", isCorrect: true },
+          { text: "Both", isCorrect: false },
+          { text: "q = (v, q)", isCorrect: false }
+        ],
+        explanation: "Lecture 2 (Slide 20, 'Thermostat as an FSM'): When heating (q = ON) and temperature ≥ 22 (Tmax), the thermostat transitions to cooling (q+ = OFF)."
+      },
+      {
+        id: 10,
+        category: "Thermostat & FSM",
+        question: "In the thermostat example: if q = OFF and T ≥ Tmax, then q+ will be:",
+        options: [
+          { text: "q+ = ON", isCorrect: false },
+          { text: "q+ = OFF", isCorrect: true },
+          { text: "Both", isCorrect: false },
+          { text: "q = (v, q)", isCorrect: false }
+        ],
+        explanation: "Lecture 2 (Slide 20): In the cooling state (q = OFF), the self-loop guard temperature > 18 holds, so the heater remains OFF (q+ = OFF); it only turns ON when T ≤ Tmin (18)."
+      },
+      {
+        id: 11,
+        category: "Thermostat & FSM",
+        question: "Controlling the temperature of a room requires switching the heater, with T ∈ [Tmin, Tmax]. The heater state will be ON when:",
+        options: [
+          { text: "q ∈ {ON}", isCorrect: false },
+          { text: "T ≤ Tmin", isCorrect: true },
+          { text: "q ∈ {OFF}", isCorrect: false },
+          { text: "T ≥ Tmax", isCorrect: false }
+        ],
+        explanation: "Lecture 2 (Slide 20): The transition from cooling to heating (heat on) is enabled when temperature ≤ 18 (T ≤ Tmin)."
+      },
+      {
+        id: 12,
+        category: "Thermostat & FSM",
+        question: "Controlling the temperature of a room requires switching the heater, with T ∈ [Tmin, Tmax]. The heater state will be OFF when:",
+        options: [
+          { text: "q ∈ {OFF}", isCorrect: false },
+          { text: "q ∈ {ON}", isCorrect: false },
+          { text: "T = Tmax", isCorrect: true },
+          { text: "T = Tmin", isCorrect: false }
+        ],
+        explanation: "Lecture 2 (Slide 20): The transition from heating to cooling (heat off) occurs when temperature reaches Tmax (temperature ≥ 22)."
+      },
+      {
+        id: 13,
+        category: "Thermostat & FSM",
+        question: "To ensure we stay in the optimal temperature range in the heater example, what do we use?",
+        options: [
+          { text: "Guard function", isCorrect: true },
+          { text: "T ≥ Tmax", isCorrect: false },
+          { text: "T ≤ Tmin", isCorrect: false },
+          { text: "T ∈ [Tmin, Tmax] only", isCorrect: false }
+        ],
+        explanation: "Lecture 2 (Slides 14–16 & 20): Guard functions evaluate conditions on temperature thresholds (18 and 22 hysteresis bounds) to control transitions."
+      },
+      {
+        id: 14,
+        category: "Thermostat & FSM",
+        question: "What does it mean for a state machine to be \"deterministic\"?",
+        options: [
+          { text: "The state machine's behavior is entirely predictable without knowing the inputs", isCorrect: false },
+          { text: "The machine will always return to its initial state after a certain number of steps", isCorrect: false },
+          { text: "For any given state and input, at most one transition is enabled", isCorrect: true },
+          { text: "The state machine will always produce the same output, regardless of the input", isCorrect: false },
+          { text: "The number of states in the machine is determined at runtime", isCorrect: false }
+        ],
+        explanation: "Lecture 3/5 ('Determinacy and receptiveness'): Deterministic means in every state, each input value enables at most one transition."
+      },
+      {
+        id: 15,
+        category: "Thermostat & FSM",
+        question: "In the formal definition of a Finite State Machine (FSM), what ensures that the machine is receptive?",
+        options: [
+          { text: "There is a clearly defined initial state", isCorrect: false },
+          { text: "The guards on transitions are mutually exclusive", isCorrect: false },
+          { text: "The inputs are restricted to pure signals", isCorrect: false },
+          { text: "The set of states is finite", isCorrect: false },
+          { text: "The 'update' is a total function, defined for every possible state and input value", isCorrect: true }
+        ],
+        explanation: "Lecture 3/5 ('Determinacy and receptiveness'): Receptiveness means every state and input value enables at least one transition, making 'update' a total function."
+      },
+      {
+        id: 16,
+        category: "Thermostat & FSM",
+        question: "In the mouse double-click detector example, what is the role of the continuous variable x(t)?",
+        options: [
+          { text: "To count the number of single clicks", isCorrect: false },
+          { text: "To generate the 'single' and 'double' output signals", isCorrect: false },
+          { text: "To determine the position of the mouse cursor", isCorrect: false },
+          { text: "To measure the time elapsed since the last mouse click", isCorrect: true },
+          { text: "To store the state of the mouse button (pressed or released)", isCorrect: false }
+        ],
+        explanation: "Lecture 3/5 (Slide 14) & Lecture 6 (Slide 7): x(t) is a continuous clock (dx/dt = 1 in state 'one') that measures elapsed time since the last click."
+      },
+      {
+        id: 17,
+        category: "Thermostat & FSM",
+        question: "Design an extended state machine for a traffic light: GREEN normally transitions to YELLOW after 150 s (with pending states P1, P2; YELLOW lasts 15 s; RED lasts 100 s; outputs are sigG, sigY, sigR). Is this system continuous dynamics?",
+        options: [
+          { text: "False", isCorrect: true },
+          { text: "True", isCorrect: false }
+        ],
+        explanation: "Lecture 3/5 ('Traffic light controller'): A time-triggered extended FSM reacting once per second with a discrete counter is a discrete system, not continuous dynamics."
+      },
+
+      // --- Category: DAC (18-21) ---
+      {
+        id: 18,
+        category: "DAC",
+        question: "What is a major drawback of the weighted-resistor DAC architecture, especially for high-resolution converters?",
+        options: [
+          { text: "The output voltage is always inverted", isCorrect: false },
+          { text: "It can only handle a very limited range of input voltages", isCorrect: false },
+          { text: "Its slow conversion speed compared to other DAC types", isCorrect: false },
+          { text: "It consumes significantly more power than an R-2R ladder DAC", isCorrect: false },
+          { text: "The requirement for a wide range of resistor values with high precision, which is difficult to manufacture accurately", isCorrect: true }
+        ],
+        explanation: "Data Converters (Slide 10): High-resolution weighted-resistor DACs require huge ratios between MSB and LSB resistors (e.g., 1 kΩ to 2 MΩ for 12-bit), making accurate IC fabrication difficult and expensive."
+      },
+      {
+        id: 19,
+        category: "DAC",
+        question: "Why is the R-2R Ladder DAC generally preferred over the Weighted-Resistor DAC?",
+        options: [
+          { text: "It is the most expensive and complex type of DAC to manufacture", isCorrect: false },
+          { text: "It is seldom used in modern designs because fabricating the precise ratio between different resistor values leads to significant non-linearity", isCorrect: false },
+          { text: "It is the only type that can be used for high-resolution applications", isCorrect: false },
+          { text: "It is the fastest type of DAC because it completely avoids operational amplifiers", isCorrect: false },
+          { text: "It is more popular because it simplifies manufacturing and improves accuracy by only requiring two resistor values (R and 2R)", isCorrect: true }
+        ],
+        explanation: "Data Converters (Slides 10 & 14): R-2R ladder DAC requires only two resistor values (R and 2R), making it easy to manufacture with fewer errors."
+      },
+      {
+        id: 20,
+        category: "DAC",
+        question: "For a digital-to-analog converter (DAC), what does \"resolution\" signify?",
+        options: [
+          { text: "The speed at which the DAC can convert digital signals to analog", isCorrect: false },
+          { text: "The maximum output voltage the DAC can produce", isCorrect: false },
+          { text: "The smallest change in analog output voltage corresponding to a one-bit change in the digital input", isCorrect: true },
+          { text: "The number of resistors used in the DAC's ladder network", isCorrect: false },
+          { text: "The physical size of the DAC integrated circuit", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 15): Resolution (V_LSB = V_FS / 2^n) is the smallest change in analog output voltage for a 1-LSB change in digital input."
+      },
+      {
+        id: 21,
+        category: "DAC",
+        question: "What is the voltage resolution (step size) of an 8-bit DAC with a full-scale output voltage (VFS) of 5.12 V?",
+        options: [
+          { text: "80 mV", isCorrect: false },
+          { text: "20 mV", isCorrect: true },
+          { text: "Multiply the number of levels by VFS: 2^8 × 5.12 V", isCorrect: false },
+          { text: "51.2 mV", isCorrect: false },
+          { text: "5.12 V divided by 8 bits = 0.64 V (640 mV)", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slides 15–16): Resolution = V_FS / 2^n = 5.12 V / 2^8 = 5.12 / 256 = 0.02 V = 20 mV."
+      },
+
+      // --- Category: Counter ADC (22-27) ---
+      {
+        id: 22,
+        category: "Counter ADC",
+        question: "Which of the following is NOT a main building block of a staircase approximation ADC?",
+        options: [
+          { text: "Frequency generator", isCorrect: true },
+          { text: "n-bit counter", isCorrect: false },
+          { text: "DAC (Digital-to-Analog Converter)", isCorrect: false },
+          { text: "Op-Amp comparator", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 20): The main building blocks of a staircase approximation (Counter Type) ADC are an n-bit counter, DAC, and Op-Amp comparator."
+      },
+      {
+        id: 23,
+        category: "Counter ADC",
+        question: "What happens when the DAC output is lower than the input analog voltage in a staircase approximation ADC?",
+        options: [
+          { text: "The n-bit counter receives a low clock pulse", isCorrect: false },
+          { text: "The digital output is stored", isCorrect: false },
+          { text: "The comparator produces a high pulse to the counter", isCorrect: true },
+          { text: "The DAC is reset to zero", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 20): When DAC output < analog input voltage, the comparator produces a high pulse to clock/increment the n-bit counter."
+      },
+      {
+        id: 24,
+        category: "Counter ADC",
+        question: "In a staircase approximation ADC, what is the role of the op-amp comparator?",
+        options: [
+          { text: "To generate a clock pulse", isCorrect: false },
+          { text: "To store the digital values of the input voltage", isCorrect: false },
+          { text: "To compare the output of the DAC with the input analog voltage", isCorrect: true },
+          { text: "To convert digital output to analog", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 20): The op-amp comparator compares the analog output of the DAC against the analog input voltage."
+      },
+      {
+        id: 25,
+        category: "Counter ADC",
+        question: "Why is the Counter Type ADC (staircase approximation ADC) generally considered to have a slow conversion speed?",
+        options: [
+          { text: "It requires a very large number of comparators", isCorrect: false },
+          { text: "Its speed is limited by the propagation delay of the priority-encoder logic", isCorrect: false },
+          { text: "The complex digital algorithm of the successive approximation register performs a full binary search", isCorrect: false },
+          { text: "The settling time of the internal operational amplifier in the summing circuit gets worse as the number of bits increases", isCorrect: false },
+          { text: "The internal counter must start from zero for each conversion and increment one step at a time until its analog value matches the input", isCorrect: true }
+        ],
+        explanation: "Data Converters (Slide 20): Speed is low because for every conversion the counter must start from ZERO and count up one step at a time."
+      },
+      {
+        id: 26,
+        category: "Counter ADC",
+        question: "Which of the following is a disadvantage of the staircase approximation ADC?",
+        options: [
+          { text: "High complexity in design", isCorrect: false },
+          { text: "High power consumption", isCorrect: false },
+          { text: "High cost of implementation", isCorrect: false },
+          { text: "Low speed due to the counter starting from zero with each cycle", isCorrect: true }
+        ],
+        explanation: "Data Converters (Slide 20): While simple and low-cost, its disadvantage is low speed because the counter resets to zero on every conversion."
+      },
+      {
+        id: 27,
+        category: "Counter ADC",
+        question: "In a counter-type ADC, how is the conversion time determined?",
+        options: [
+          { text: "It is always a fixed number of clock cycles, regardless of the input voltage", isCorrect: false },
+          { text: "The time taken for the internal counter to ramp up to a value where the DAC output matches the analog input voltage", isCorrect: true },
+          { text: "By the propagation delay of the comparator only", isCorrect: false },
+          { text: "The settling time of the DAC divided by the number of bits", isCorrect: false },
+          { text: "The number of bits in the ADC multiplied by the clock period", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slides 20 & 23): Conversion time depends on the analog input voltage as the counter ramps up until DAC output matches the input (worst-case (2^n - 1) × T_clk)."
+      },
+
+      // --- Category: SAR ADC (28-33) ---
+      {
+        id: 28,
+        category: "SAR ADC",
+        question: "In a Successive Approximation ADC, how does the successive-approximation register determine the correct binary output?",
+        options: [
+          { text: "It tries different bit values from the MSB to the LSB, adjusting based on comparator output", isCorrect: true },
+          { text: "It tries different bit values starting from the LSB to the MSB", isCorrect: false },
+          { text: "It uses a ramp signal to match the input analog voltage", isCorrect: false },
+          { text: "It counts in a full binary sequence from 0 to full scale", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 24): SAR tests bits starting from the Most Significant Bit (MSB) down to the Least Significant Bit (LSB) based on comparator feedback."
+      },
+      {
+        id: 29,
+        category: "SAR ADC",
+        question: "What is the defining characteristic of a successive approximation ADC?",
+        options: [
+          { text: "It determines the digital output bit by bit, from the most significant bit to the least significant bit", isCorrect: true },
+          { text: "It uses a ramp generator and a counter to find the digital value", isCorrect: false },
+          { text: "Its conversion time is highly dependent on the analog input voltage", isCorrect: false },
+          { text: "It requires 2^n - 1 comparators for an n-bit conversion", isCorrect: false },
+          { text: "It is the simplest and cheapest ADC architecture", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slides 24 & 27): SAR ADC determines the digital output bit-by-bit from MSB to LSB in n clock cycles."
+      },
+      {
+        id: 30,
+        category: "SAR ADC",
+        question: "How is the conversion time (Tconv) for a Successive Approximation (SAR) ADC determined?",
+        options: [
+          { text: "It is constant for any input voltage: number of bits (n) × clock period (Tclk)", isCorrect: true },
+          { text: "The conversion is completed in a single clock cycle", isCorrect: false },
+          { text: "By the propagation delays of all the comparators firing in parallel plus the priority-encoder delay", isCorrect: false },
+          { text: "(2^n - 1) × Tclk", isCorrect: false },
+          { text: "It is highly dependent on the amplitude of the analog input; worst case (2^n - 1) × Tclk", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 27): SAR conversion time is constant regardless of input voltage: T_conv = n × T_clk."
+      },
+      {
+        id: 31,
+        category: "SAR ADC",
+        question: "Which of the following is true regarding the operation of the Successive Approximation ADC?",
+        options: [
+          { text: "It is unable to provide accurate digital results for all analog input voltages", isCorrect: false },
+          { text: "It provides faster results by adjusting the binary count in a more efficient manner", isCorrect: true },
+          { text: "It requires more time than a ramp-type ADC because of the binary counting sequence", isCorrect: false },
+          { text: "It uses a counter that tries all values in binary from the LSB to the MSB", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 24): SAR converges to the analog input much faster than the 0-to-full-scale sequence of a counter-type ADC."
+      },
+      {
+        id: 32,
+        category: "SAR ADC",
+        question: "What is the main advantage of using a Successive Approximation ADC over a Digital Ramp ADC?",
+        options: [
+          { text: "It converges to the analog input much faster, reducing conversion time", isCorrect: true },
+          { text: "It does not require a comparator for operation", isCorrect: false },
+          { text: "It generates a more accurate output due to a slower counting sequence", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 24): By testing bits MSB-to-LSB, SAR converges in n cycles instead of up to 2^n - 1 cycles."
+      },
+      {
+        id: 33,
+        category: "SAR ADC",
+        question: "In a Successive Approximation ADC, how does the Successive Approximation Register (SAR) work during the conversion process?",
+        options: [
+          { text: "It adjusts the bit values based on the comparator output and tries different binary combinations", isCorrect: true },
+          { text: "It continuously counts in binary and compares the result with the input signal", isCorrect: false },
+          { text: "It monitors the input signal and generates a ramp output signal", isCorrect: false },
+          { text: "It only adjusts the output when the comparator indicates an error", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slides 24 & 27): The SAR monitors the comparator output after setting each bit and keeps or resets the bit accordingly."
+      },
+
+      // --- Category: Flash ADC (34-38) ---
+      {
+        id: 34,
+        category: "Flash ADC",
+        question: "Which statement accurately describes the architecture of a Flash Type ADC?",
+        options: [
+          { text: "It is a very low-cost ADC but suffers from extremely slow conversion speeds", isCorrect: false },
+          { text: "It operates with a single comparator that repeatedly measures the input against the output of a DAC driven by a binary counter", isCorrect: false },
+          { text: "It requires exactly n comparators and a DAC for an n-bit conversion", isCorrect: false },
+          { text: "It is the fastest ADC because it employs 2^n - 1 comparators to evaluate the input against multiple voltage levels simultaneously, completing the conversion in one cycle", isCorrect: true },
+          { text: "It is built around a successive approximation register that tests different bit combinations starting from the MSB", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 28): Flash ADC uses 2^n - 1 comparators in parallel to compare the input simultaneously in 1 cycle."
+      },
+      {
+        id: 35,
+        category: "Flash ADC",
+        question: "What is the primary characteristic of a Flash Type ADC that distinguishes it from other types of ADCs?",
+        options: [
+          { text: "It converts the analog signal step by step, one bit at a time", isCorrect: false },
+          { text: "It uses a series of comparators to compare the input signal with unique reference voltages", isCorrect: true },
+          { text: "It uses a ramp signal to approximate the analog input", isCorrect: false },
+          { text: "It relies on a counter to increment and compare values", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 28): Flash (parallel) ADC consists of a series of 2^n - 1 comparators, each comparing the input signal to a unique reference voltage."
+      },
+      {
+        id: 36,
+        category: "Flash ADC",
+        question: "The Flash Type ADC is considered the fastest type of ADC.",
+        options: [
+          { text: "True", isCorrect: true },
+          { text: "False", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 28): Flash Type ADC is the fastest ADC architecture (typical conversion time ≤ 100 ns)."
+      },
+      {
+        id: 37,
+        category: "Flash ADC",
+        question: "Why is a Flash ADC considered the fastest type of ADC?",
+        options: [
+          { text: "It has the lowest number of components, reducing internal delays", isCorrect: false },
+          { text: "It uses a parallel arrangement of comparators, allowing simultaneous comparison of the input voltage to all reference levels", isCorrect: true },
+          { text: "It uses a successive approximation register to quickly narrow down the digital value", isCorrect: false },
+          { text: "It employs a very high-frequency clock to speed up the conversion process", isCorrect: false },
+          { text: "It uses a counter that can be reset very quickly", isCorrect: false }
+        ],
+        explanation: "Data Converters (Slide 28): Conversion is performed simultaneously across a parallel bank of comparators in a single clock cycle."
+      },
+      {
+        id: 38,
+        category: "Flash ADC",
+        question: "How many comparators are required to convert an analog input voltage to a 10-bit digital output in a Flash Type ADC?",
+        options: [
+          { text: "1024 comparators", isCorrect: false },
+          { text: "10 comparators", isCorrect: false },
+          { text: "512 comparators", isCorrect: false },
+          { text: "1023 comparators", isCorrect: true }
+        ],
+        explanation: "Data Converters (Slide 28): Required comparators = 2^n - 1 = 2^10 - 1 = 1024 - 1 = 1023."
+      }
+    ];
+
+    const TOPICS = [
+      { id: "ALL", label: "الكل (38)" },
+      { id: "CPS & Models", label: "CPS & Models" },
+      { id: "Thermostat & FSM", label: "Thermostat & FSM" },
+      { id: "DAC", label: "DAC" },
+      { id: "Counter ADC", label: "Counter ADC" },
+      { id: "SAR ADC", label: "SAR ADC" },
+      { id: "Flash ADC", label: "Flash ADC" }
+    ];
+
+    const TOPIC_BADGE_STYLES = {
+      "CPS & Models": "bg-sky-50 text-sky-700 border-sky-200/80",
+      "Thermostat & FSM": "bg-violet-50 text-violet-700 border-violet-200/80",
+      "DAC": "bg-amber-50 text-amber-700 border-amber-200/80",
+      "Counter ADC": "bg-teal-50 text-teal-700 border-teal-200/80",
+      "SAR ADC": "bg-indigo-50 text-indigo-700 border-indigo-200/80",
+      "Flash ADC": "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200/80"
+    };
+
+    const LETTERS = ["A", "B", "C", "D", "E"];
+
+    // Application State
+    let state = {
+      isShuffled: true,
+      activeFilter: "ALL", // "ALL", topic string, or "WRONG_ONLY"
+      questions: [],       // Working list of question objects with shuffled options
+      answers: {}          // Map: questionId -> { selectedOptionIndex, isCorrect }
+    };
+
+    let toastTimer = null;
+
+    /**
+     * Fisher-Yates unbiased array shuffle
+     */
+    function fisherYatesShuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    /**
+     * Show non-blocking floating toast notification
+     */
+    function showToast(message, icon = "✨") {
+      const toast = document.getElementById("toast");
+      const msgEl = document.getElementById("toast-message");
+      const iconEl = document.getElementById("toast-icon");
+
+      msgEl.textContent = message;
+      iconEl.textContent = icon;
+
+      toast.classList.remove("opacity-0", "translate-y-3");
+      toast.classList.add("opacity-100", "translate-y-0");
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("opacity-100", "translate-y-0");
+        toast.classList.add("opacity-0", "translate-y-3");
+      }, 2800);
+    }
+
+    /**
+     * Initialize or rebuild the working questions list with shuffled questions & options
+     */
+    function buildQuestionSet(shuffleAll = true) {
+      const prepared = RAW_QUESTIONS.map((q) => ({
+        ...q,
+        shuffledOptions: shuffleAll ? fisherYatesShuffle(q.options) : [...q.options]
+      }));
+
+      state.questions = shuffleAll ? fisherYatesShuffle(prepared) : prepared;
+    }
+
+    /**
+     * Toggle between Shuffled Order and Topic Order without losing current answers
+     */
+    function toggleOrderMode() {
+      state.isShuffled = !state.isShuffled;
+      const labelEl = document.getElementById("toggle-order-label");
+
+      if (state.isShuffled) {
+        state.questions = fisherYatesShuffle(state.questions);
+        labelEl.textContent = "ترتيب عشوائي";
+        showToast("تم تفعيل الترتيب العشوائي للأسئلة", "🔀");
+      } else {
+        state.questions.sort((a, b) => a.id - b.id);
+        labelEl.textContent = "ترتيب المحاضرات";
+        showToast("تم الترتيب حسب تسلسل المحاضرات", "📚");
+      }
+
+      renderQuestions();
+    }
+
+    /**
+     * Filter questions by topic or wrong-only mode
+     */
+    function setCategoryFilter(filterKey) {
+      state.activeFilter = filterKey;
+      renderTopicFilters();
+      renderQuestions();
+    }
+
+    /**
+     * Review only incorrectly answered questions
+     */
+    function reviewWrongAnswers() {
+      const wrongCount = Object.values(state.answers).filter((a) => !a.isCorrect).length;
+      if (wrongCount === 0) {
+        const answeredCount = Object.keys(state.answers).length;
+        if (answeredCount === 0) {
+          showToast("لم تقم بحل أي سؤال بعد!", "ℹ️");
+        } else {
+          showToast("رائع! لا توجد أي إجابات خاطئة لمراجعتها 🎉", "🏆");
+        }
+        return;
+      }
+
+      state.activeFilter = "WRONG_ONLY";
+      renderTopicFilters();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast(`يتم الآن عرض الأسئلة الخاطئة فقط (${wrongCount})`, "🔍");
+    }
+
+    /**
+     * Retake quiz: reset answers, reshuffle questions & choices, scroll to top
+     */
+    function retakeQuiz() {
+      state.answers = {};
+      state.activeFilter = "ALL";
+      state.isShuffled = true;
+      document.getElementById("toggle-order-label").textContent = "ترتيب عشوائي";
+
+      buildQuestionSet(true);
+      updateStatsUI();
+      renderTopicFilters();
+      renderQuestions();
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("تم إعادة الكويز وعمل Shuffle جديد للأسئلة والاختيارات", "🔄");
+    }
+
+    /**
+     * Handle clicking an option on a question card (Instant Feedback)
+     */
+    function handleOptionSelect(questionId, optionIndex) {
+      // Lock if already answered
+      if (state.answers[questionId] !== undefined) return;
+
+      const question = state.questions.find((q) => q.id === questionId);
+      if (!question) return;
+
+      const chosenOption = question.shuffledOptions[optionIndex];
+      const isCorrect = Boolean(chosenOption && chosenOption.isCorrect);
+
+      state.answers[questionId] = {
+        selectedOptionIndex: optionIndex,
+        isCorrect: isCorrect
+      };
+
+      // Update card DOM directly for crisp micro-animation without re-rendering whole list
+      updateSingleCardUI(question, optionIndex, isCorrect);
+      updateStatsUI();
+    }
+
+    /**
+     * Update a single question card in place upon selection
+     */
+    function updateSingleCardUI(question, selectedIndex, isCorrect) {
+      const card = document.getElementById(`q-card-${question.id}`);
+      if (!card) return;
+
+      card.classList.add("animate-select");
+
+      const optionButtons = card.querySelectorAll(".option-btn");
+      optionButtons.forEach((btn, idx) => {
+        btn.disabled = true;
+        btn.classList.remove(
+          "hover:border-indigo-400",
+          "hover:bg-indigo-50/50",
+          "cursor-pointer",
+          "bg-white",
+          "border-slate-200"
+        );
+        btn.classList.add("cursor-default");
+
+        const opt = question.shuffledOptions[idx];
+        const badge = btn.querySelector(".letter-badge");
+        const statusIcon = btn.querySelector(".status-icon");
+
+        if (opt.isCorrect) {
+          // Highlight correct option in emerald green
+          btn.classList.add(
+            "bg-emerald-50",
+            "border-emerald-500",
+            "text-emerald-950",
+            "ring-1",
+            "ring-emerald-500"
+          );
+          badge.classList.remove("bg-slate-100", "text-slate-700");
+          badge.classList.add("bg-emerald-600", "text-white");
+          statusIcon.innerHTML = `
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">✓</span>
+          `;
+        } else if (idx === selectedIndex && !isCorrect) {
+          // Highlight chosen incorrect option in rose red
+          btn.classList.add(
+            "bg-rose-50",
+            "border-rose-500",
+            "text-rose-950",
+            "ring-1",
+            "ring-rose-500"
+          );
+          badge.classList.remove("bg-slate-100", "text-slate-700");
+          badge.classList.add("bg-rose-600", "text-white");
+          statusIcon.innerHTML = `
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold shadow-xs">✕</span>
+          `;
+        } else {
+          // Dim remaining unselected wrong choices
+          btn.classList.add("bg-slate-50/60", "border-slate-200/70", "opacity-55");
+        }
+      });
+
+      // Reveal Explanation Box with smooth animation
+      const expBox = card.querySelector(".explanation-box");
+      if (expBox) {
+        expBox.classList.remove("hidden");
+        expBox.classList.add("animate-explanation");
+      }
+    }
+
+    /**
+     * Update live counters, progress bar, and bottom summary card
+     */
+    function updateStatsUI() {
+      const total = RAW_QUESTIONS.length;
+      const answerValues = Object.values(state.answers);
+      const answered = answerValues.length;
+      const correct = answerValues.filter((a) => a.isCorrect).length;
+      const wrong = answered - correct;
+      const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+      const progressPct = Math.round((answered / total) * 100);
+
+      // Header counters
+      document.getElementById("stat-answered").textContent = `${answered} / ${total}`;
+      document.getElementById("stat-correct").textContent = correct;
+      document.getElementById("stat-wrong").textContent = wrong;
+      document.getElementById("stat-accuracy").textContent = `${accuracy}%`;
+      document.getElementById("progress-bar").style.width = `${progressPct}%`;
+
+      // Bottom summary card
+      document.getElementById("summary-score").textContent = `${correct} / ${total}`;
+      document.getElementById("summary-accuracy").textContent = `${accuracy}%`;
+      document.getElementById("summary-wrong").textContent = wrong;
+      document.getElementById("wrong-btn-count").textContent = wrong;
+
+      const headlineEl = document.getElementById("summary-headline");
+      const subtextEl = document.getElementById("summary-subtext");
+
+      if (answered === 0) {
+        headlineEl.textContent = "ابدأ بحل الأسئلة بالأعلى لمتابعة مستواك";
+        subtextEl.textContent = "جميع الأسئلة الـ 38 متاحة في هذه الصفحة مع تصحيح فوري ومرجع كل سؤال في المحاضرات.";
+      } else if (answered < total) {
+        headlineEl.textContent = `أجبت على ${answered} من ${total} سؤال حتى الآن`;
+        subtextEl.textContent = `أكمل باقي الأسئلة (${total - answered} متبقي) أو راجع إجاباتك الخاطئة في أي وقت.`;
+      } else {
+        if (accuracy >= 85) {
+          headlineEl.textContent = "ممتاز جداً! مستوى رائع وجاهز للامتحان 🏆";
+        } else if (accuracy >= 65) {
+          headlineEl.textContent = "جيد جداً! خطوة ممتازة، راجع أخطاءك لتثبيت المعلومة 👏";
+        } else {
+          headlineEl.textContent = "بداية جيدة! راجع الإجابات الخاطئة وأعد الكويز لرفع درجتك 💪";
+        }
+        subtextEl.textContent = `أنهيت جميع الأسئلة الـ 38 بنسبة دقة ${accuracy}% (${correct} صحيح و ${wrong} خطأ).`;
+      }
+    }
+
+    /**
+     * Render Topic Filter Pills in the sticky header
+     */
+    function renderTopicFilters() {
+      const container = document.getElementById("topic-filters");
+      container.innerHTML = TOPICS.map((topic) => {
+        const isActive = state.activeFilter === topic.id;
+        const count = topic.id === "ALL"
+          ? RAW_QUESTIONS.length
+          : RAW_QUESTIONS.filter((q) => q.category === topic.id).length;
+
+        const labelText = topic.id === "ALL" ? `الكل (${count})` : `${topic.label} (${count})`;
+
+        return `
+          <button
+            type="button"
+            onclick="setCategoryFilter('${topic.id}')"
+            class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold font-arabic transition ${
+              isActive
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-slate-100 hover:bg-slate-200/80 text-slate-600"
+            }"
+          >
+            ${labelText}
+          </button>
+        `;
+      }).join("");
+    }
+
+    /**
+     * Escape HTML entities to prevent rendering bugs with <, >, & in math/logic text
+     */
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /**
+     * Render all visible question cards on the single page
+     */
+    function renderQuestions() {
+      const container = document.getElementById("questions-container");
+      const banner = document.getElementById("filter-status-banner");
+      const bannerText = document.getElementById("filter-status-text");
+
+      let visibleQuestions = state.questions;
+
+      if (state.activeFilter === "WRONG_ONLY") {
+        visibleQuestions = state.questions.filter(
+          (q) => state.answers[q.id] && !state.answers[q.id].isCorrect
+        );
+        banner.classList.remove("hidden");
+        bannerText.textContent = `وضع مراجعة الأخطاء: معروض ${visibleQuestions.length} سؤال`;
+      } else if (state.activeFilter !== "ALL") {
+        visibleQuestions = state.questions.filter((q) => q.category === state.activeFilter);
+        banner.classList.remove("hidden");
+        bannerText.textContent = `تصفية حسب الموضوع: ${state.activeFilter} (${visibleQuestions.length} سؤال)`;
+      } else {
+        banner.classList.add("hidden");
+      }
+
+      if (visibleQuestions.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center font-arabic" dir="rtl">
+            <p class="text-slate-700 font-bold text-base mb-2">لا توجد أسئلة مطابقة لهذا الفلتر حالياً.</p>
+            <button
+              type="button"
+              onclick="setCategoryFilter('ALL')"
+              class="mt-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition"
+            >
+              العودة إلى جميع الأسئلة (38)
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = visibleQuestions.map((q, displayIdx) => {
+        const userAns = state.answers[q.id];
+        const isAnswered = userAns !== undefined;
+        const badgeStyle = TOPIC_BADGE_STYLES[q.category] || "bg-slate-100 text-slate-700 border-slate-200";
+
+        const optionsHTML = q.shuffledOptions.map((opt, optIdx) => {
+          const letter = LETTERS[optIdx] || String.fromCharCode(65 + optIdx);
+
+          let btnClasses = "bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 cursor-pointer";
+          let badgeClasses = "bg-slate-100 text-slate-700";
+          let statusHTML = "";
+
+          if (isAnswered) {
+            if (opt.isCorrect) {
+              btnClasses = "bg-emerald-50 border-emerald-500 text-emerald-950 ring-1 ring-emerald-500 cursor-default";
+              badgeClasses = "bg-emerald-600 text-white";
+              statusHTML = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">✓</span>`;
+            } else if (optIdx === userAns.selectedOptionIndex && !userAns.isCorrect) {
+              btnClasses = "bg-rose-50 border-rose-500 text-rose-950 ring-1 ring-rose-500 cursor-default";
+              badgeClasses = "bg-rose-600 text-white";
+              statusHTML = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold shadow-xs">✕</span>`;
+            } else {
+              btnClasses = "bg-slate-50/60 border-slate-200/70 opacity-55 cursor-default";
+            }
+          }
+
+          return `
+            <button
+              type="button"
+              ${isAnswered ? "disabled" : ""}
+              onclick="handleOptionSelect(${q.id}, ${optIdx})"
+              class="option-btn w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-3 ${btnClasses}"
+              dir="ltr"
+            >
+              <div class="flex items-start sm:items-center gap-3">
+                <span class="letter-badge w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${badgeClasses}">
+                  ${letter}
+                </span>
+                <span class="text-sm sm:text-[15px] font-medium leading-snug">
+                  ${escapeHTML(opt.text)}
+                </span>
+              </div>
+              <div class="status-icon shrink-0">
+                ${statusHTML}
+              </div>
+            </button>
+          `;
+        }).join("");
+
+        return `
+          <article
+            id="q-card-${q.id}"
+            class="bg-white rounded-3xl border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow p-5 sm:p-6"
+          >
+            <!-- Card Metadata Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5" dir="ltr">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold">
+                  Q${displayIdx + 1}
+                </span>
+                <span class="text-xs font-medium text-slate-400">
+                  Ref #${q.id}
+                </span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeStyle}">
+                ${escapeHTML(q.category)}
+              </span>
+            </div>
+
+            <!-- Question Text (LTR for clean math/logic formatting) -->
+            <h2 class="text-base sm:text-[17px] font-semibold text-slate-900 leading-relaxed mb-4" dir="ltr">
+              ${escapeHTML(q.question)}
+            </h2>
+
+            <!-- Options Stack -->
+            <div class="space-y-2.5" dir="ltr">
+              ${optionsHTML}
+            </div>
+
+            <!-- Instant Explanation Box (Revealed upon answering) -->
+            <div
+              class="explanation-box ${isAnswered ? "" : "hidden"} mt-4 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 border-l-4 border-l-indigo-600 text-slate-800"
+              dir="ltr"
+            >
+              <div class="flex items-start gap-2.5">
+                <svg class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <div class="text-xs sm:text-sm leading-relaxed">
+                  <span class="font-bold text-indigo-900 block mb-0.5">Lecture Reference & Explanation:</span>
+                  <span class="text-slate-700">${escapeHTML(q.explanation)}</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // Bootstrap application on load
+    window.addEventListener("DOMContentLoaded", () => {
+      buildQuestionSet(true);
+      renderTopicFilters();
+      updateStatsUI();
+      renderQuestions();
+    });
+  </script>
+</body>
+</html>
